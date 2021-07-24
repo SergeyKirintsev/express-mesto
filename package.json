@@ -1,7 +1,7 @@
 {
   "name": "express-mesto",
   "version": "1.0.0",
-  "description": "## Директории",
+  "description": "Сервер для проекта Место",
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint .",
@@ -13,7 +13,7 @@
     "url": "git+https://github.com/SergeyKirintsev/express-mesto.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sergey Kirintsev",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/SergeyKirintsev/express-mesto/issues"
