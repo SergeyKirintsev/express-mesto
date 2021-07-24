@@ -5,7 +5,7 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
@@ -14,14 +14,14 @@ const createUser = (req, res) => {
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send(users))
+    .then((data) => res.send({ data }))
     .catch(() => res.status(500).send({ message: 'Ошибка на сервере' }));
 };
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
@@ -41,7 +41,7 @@ const updateProfile = (req, res) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
@@ -62,7 +62,7 @@ const updateAvatar = (req, res) => {
       upsert: true, // если пользователь не найден, он будет создан
     },
   )
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара.' });

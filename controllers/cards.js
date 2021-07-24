@@ -5,7 +5,7 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Карчточка не найдена' });
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании карточки.' });
@@ -15,7 +15,7 @@ const createCard = (req, res) => {
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.send(cards))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Карчточка не найдена' });
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: ' Переданы некорректные данные' });
@@ -26,7 +26,7 @@ const getCards = (req, res) => {
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.deleteOne({ _id: cardId })
-    .then((card) => res.send(card))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
       if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: ' Переданы некорректные данные' });
@@ -40,7 +40,7 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка.' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
@@ -53,7 +53,7 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .then((user) => res.send(user))
+    .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка.' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
