@@ -1,6 +1,6 @@
 {
   "extends": "airbnb-base",
-   "rules": {
+  "rules": {
     "no-underscore-dangle": [
       "error",
       {
@@ -8,7 +8,6 @@
           "_id"
         ]
       }
-    ],
-    "no-console": "off"
+    ]
   }
 }

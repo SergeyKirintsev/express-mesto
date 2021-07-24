@@ -43,9 +43,8 @@ const updateProfile = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      console.log(err.name);
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь не найден' });
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
+      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
@@ -65,9 +64,8 @@ const updateAvatar = (req, res) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      console.log(err.name);
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь не найден' });
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные' });
+      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
+      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       return res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
