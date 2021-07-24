@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { VALIDATION_ERROR_CODE, CAST_ERROR_CODE } = require('../utils/utils');
+const { VALIDATION_ERROR_CODE, CAST_ERROR_CODE, makeCastError } = require('../utils/utils');
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -21,6 +21,7 @@ const getUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail(() => makeCastError())
     .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -40,6 +41,7 @@ const updateProfile = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
+    .orFail(() => makeCastError())
     .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
@@ -60,6 +62,7 @@ const updateAvatar = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
+    .orFail(() => makeCastError())
     .then((data) => res.send({ data }))
     .catch((err) => {
       if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
