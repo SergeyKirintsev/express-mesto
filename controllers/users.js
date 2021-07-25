@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { VALIDATION_ERROR_CODE, CAST_ERROR_CODE, makeCastError } = require('../utils/utils');
+const { makeNotFounError, checkErrors } = require('../utils/utils');
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -7,25 +7,27 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgValidationError: 'Переданы некорректные данные при создании пользователя',
+      });
     });
 };
 
 const getUsers = (req, res) => {
   User.find({})
     .then((data) => res.send({ data }))
-    .catch(() => res.status(500).send({ message: 'Ошибка на сервере' }));
+    .catch((err) => checkErrors(err, res));
 };
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Пользователь по указанному _id не найден',
+      });
     });
 };
 
@@ -41,12 +43,14 @@ const updateProfile = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Пользователь с указанным _id не найден',
+        msgCastError: 'Невалидный id пользователя',
+        msgValidationError: 'Переданы некорректные данные при обновлении профиля',
+      });
     });
 };
 
@@ -62,12 +66,14 @@ const updateAvatar = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Пользователь с указанным _id не найден',
+        msgCastError: 'Невалидный id пользователя',
+        msgValidationError: 'Переданы некорректные данные при обновлении аватара',
+      });
     });
 };
 

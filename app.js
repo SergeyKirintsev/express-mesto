@@ -16,7 +16,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '60f9a35c53759e09a1ca3c39',
+    _id: '60f9a2dfb12a3509588152b2',
   };
 
   next();
@@ -32,5 +32,5 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`Server run on port ${PORT}`);
+  console.log(`Server run on port ${PORT}...`);
 });

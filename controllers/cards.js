@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { VALIDATION_ERROR_CODE, CAST_ERROR_CODE, makeCastError } = require('../utils/utils');
+const { makeNotFounError, checkErrors } = require('../utils/utils');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -7,25 +7,27 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'ValidationError') return res.status(VALIDATION_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании карточки.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgValidationError: 'Переданы некорректные данные при создании карточки',
+      });
     });
 };
 
 const getCards = (req, res) => {
   Card.find({})
     .then((data) => res.send({ data }))
-    .catch(() => res.status(500).send({ message: 'Ошибка на сервере' }));
+    .catch((err) => checkErrors(err, res));
 };
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.deleteOne({ _id: cardId })
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Карточка с указанным _id не найдена',
+      });
     });
 };
 
@@ -35,11 +37,13 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Карточка с указанным _id не найдена',
+        msgCastError: 'Переданы некорректные данные для постановки лайка',
+      });
     });
 };
 
@@ -49,11 +53,13 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => makeCastError())
+    .orFail(() => makeNotFounError())
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка.' });
-      return res.status(500).send({ message: 'Ошибка на сервере' });
+      checkErrors(err, res, {
+        msgNotFound: 'Карточка с указанным _id не найдена',
+        msgCastError: 'Переданы некорректные данные для снятия лайка',
+      });
     });
 };
 
