@@ -27,6 +27,7 @@ const getUserById = (req, res) => {
     .catch((err) => {
       checkErrors(err, res, {
         msgNotFound: 'Пользователь по указанному _id не найден',
+        msgCastError: 'Невалидный id пользователя',
       });
     });
 };
