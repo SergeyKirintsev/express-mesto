@@ -9,9 +9,9 @@ function makeNotFounError() {
 }
 
 function checkErrors(err, res, messages = {}) {
-  const msgNotFound = messages.msgNotFound ?? 'Поиск по id не дал результатов';
-  const msgCastError = messages.msgCastError ?? 'Невалидный id';
-  const msgValidationError = messages.msgValidationError ?? 'Переданы некорректные данные';
+  const msgNotFound = messages.msgNotFound || 'Поиск по id не дал результатов';
+  const msgCastError = messages.msgCastError || 'Невалидный id';
+  const msgValidationError = messages.msgValidationError || 'Переданы некорректные данные';
 
   if (err.name === 'NotFound') return res.status(NOT_FOUND_ERROR_CODE).send({ message: msgNotFound });
   if (err.name === 'CastError') return res.status(CAST_ERROR_CODE).send({ message: msgCastError });
