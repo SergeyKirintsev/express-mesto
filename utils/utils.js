@@ -21,8 +21,6 @@ function checkErrors(err, res, messages = {}) {
 }
 
 module.exports = {
-  VALIDATION_ERROR_CODE,
-  CAST_ERROR_CODE,
   makeNotFounError,
   checkErrors,
 };
