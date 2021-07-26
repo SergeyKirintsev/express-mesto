@@ -27,6 +27,7 @@ const deleteCard = (req, res) => {
     .catch((err) => {
       checkErrors(err, res, {
         msgNotFound: 'Карточка с указанным _id не найдена',
+        msgCastError: 'Невалидный id карточки',
       });
     });
 };
