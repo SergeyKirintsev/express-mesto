@@ -3,11 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { makeNotFounError, checkErrors } = require('../utils/utils');
 
-const getProfile = (req, res) => {
-  console.log(req.user._id);
-  res.send({ message: 'getProfile' });
-}
-
 const login = (req, res) => {
   const { email, password } = req.body;
   const { NODE_ENV, JWT_SECRET, JWT_DEV } = process.env;
@@ -125,5 +120,4 @@ module.exports = {
   updateProfile,
   updateAvatar,
   login,
-  getProfile,
 };
