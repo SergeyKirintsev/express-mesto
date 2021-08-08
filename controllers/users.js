@@ -5,14 +5,14 @@ const { makeNotFounError, checkErrors } = require('../utils/utils');
 
 const login = (req, res) => {
   const { email, password } = req.body;
-  const { NODE_ENV, JWT_SECRET } = process.env;
+  const { NODE_ENV, JWT_SECRET, JWT_DEV } = process.env;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
       // аутентификация успешна! пользователь в переменной user
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        NODE_ENV === 'production' ? JWT_SECRET : JWT_DEV,
         { expiresIn: '7d' },
       );
       res
