@@ -1,6 +1,35 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { makeNotFounError, checkErrors } = require('../utils/utils');
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+  const { NODE_ENV, JWT_SECRET } = process.env;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // аутентификация успешна! пользователь в переменной user
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' },
+      );
+      res
+        .cookie('jwt', token, {
+          // token - наш JWT токен, который мы отправляем
+          maxAge: 3600000 * 24 * 7,
+          // httpOnly: true,
+        })
+        .end();
+    })
+    .catch((err) => {
+      // ошибка аутентификации
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
 
 const createUser = (req, res) => {
   const {
@@ -90,4 +119,5 @@ module.exports = {
   getUserById,
   updateProfile,
   updateAvatar,
+  login,
 };

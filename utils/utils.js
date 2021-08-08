@@ -9,7 +9,7 @@ function makeNotFounError() {
 }
 
 function checkErrors(err, res, messages = {}) {
-  console.log(err);
+  console.log(err.message);
   const msgNotFound = messages.msgNotFound || 'Поиск по id не дал результатов';
   const msgCastError = messages.msgCastError || 'Невалидный id';
   const msgValidationError = messages.msgValidationError || 'Переданы некорректные данные';
