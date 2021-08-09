@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const errorsHandler = require('./errors/errorsHandler');
 
 const { PORT = 3000 } = process.env;
 
@@ -31,6 +32,8 @@ app.use('/cards', require('./routes/cards'));
 app.use((req, res) => {
   res.status(404).send({ message: 'Страница не найдена' });
 });
+
+app.use(errorsHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

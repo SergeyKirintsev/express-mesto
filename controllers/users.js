@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { makeNotFounError, checkErrors } = require('../utils/utils');
+const { NotFoundError } = require('../errors/not-found-err');
+const { CastError } = require('../errors/cast-err');
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   const { NODE_ENV, JWT_SECRET, JWT_DEV } = process.env;
 
@@ -23,15 +24,10 @@ const login = (req, res) => {
         })
         .end();
     })
-    .catch((err) => {
-      // ошибка аутентификации
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -41,33 +37,25 @@ const createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgValidationError: 'Переданы некорректные данные при создании пользователя',
-      });
-    });
+    .catch(next);
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((data) => res.send({ data }))
-    .catch((err) => checkErrors(err, res));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Пользователь по указанному _id не найден',
-        msgCastError: 'Невалидный id пользователя',
-      });
-    });
+    .catch(() => { throw new CastError('Невалидный id пользователя'); })
+    .catch(next);
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
@@ -79,18 +67,13 @@ const updateProfile = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Пользователь с указанным _id не найден',
-        msgCastError: 'Невалидный id пользователя',
-        msgValidationError: 'Переданы некорректные данные при обновлении профиля',
-      });
-    });
+    .catch(() => { throw new CastError('Невалидный id пользователя'); })
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
 
@@ -102,15 +85,10 @@ const updateAvatar = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Пользователь с указанным _id не найден',
-        msgCastError: 'Невалидный id пользователя',
-        msgValidationError: 'Переданы некорректные данные при обновлении аватара',
-      });
-    });
+    .catch(() => { throw new CastError('Невалидный id пользователя'); })
+    .catch(next);
 };
 
 module.exports = {
