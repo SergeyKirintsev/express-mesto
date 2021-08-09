@@ -8,8 +8,6 @@ function defaultServerError(res) {
 }
 
 module.exports = (err, req, res, next) => {
-  console.log('Обработчик ошибок >', err.name);
-  console.log('Обработчик ошибок >', err.code);
   switch (err.name) {
     case castErrorConfig.name:
       res.status(castErrorConfig.code).send({ message: err.message });
