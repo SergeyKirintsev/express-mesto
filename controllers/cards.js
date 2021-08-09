@@ -1,67 +1,56 @@
 const Card = require('../models/card');
-const { makeNotFounError, checkErrors } = require('../utils/utils');
+const { NotFoundError } = require('../errors/not-found-err');
+const { CastError } = require('../errors/cast-err');
+const { ValidationError } = require('../errors/validation-err');
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgValidationError: 'Переданы некорректные данные при создании карточки',
-      });
-    });
+    .catch(() => {
+      throw new ValidationError('Переданы некорректные данные при создании карточки');
+    })
+    .catch(next);
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((data) => res.send({ data }))
-    .catch((err) => checkErrors(err, res));
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.deleteOne({ _id: cardId })
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Карточка с указанным _id не найдена',
-        msgCastError: 'Невалидный id карточки',
-      });
-    });
+    .catch(() => { throw new CastError('Невалидный id карточки'); })
+    .catch(next);
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Карточка с указанным _id не найдена',
-        msgCastError: 'Переданы некорректные данные для постановки лайка',
-      });
-    });
+    .catch(() => { throw new CastError('Переданы некорректные данные для постановки лайка'); })
+    .catch(next);
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => makeNotFounError())
+    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
     .then((data) => res.send({ data }))
-    .catch((err) => {
-      checkErrors(err, res, {
-        msgNotFound: 'Карточка с указанным _id не найдена',
-        msgCastError: 'Переданы некорректные данные для снятия лайка',
-      });
-    });
+    .catch(() => { throw new CastError('Переданы некорректные данные для снятия лайка'); })
+    .catch(next);
 };
 
 module.exports = {
