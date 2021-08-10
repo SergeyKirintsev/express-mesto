@@ -1,17 +1,10 @@
-const authErrorConfig = {
-  code: 401,
-  name: 'authError',
-};
-
 class AuthError extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = authErrorConfig.code;
-    this.name = authErrorConfig.name;
+    this.statusCode = 401;
   }
 }
 
 module.exports = {
-  authErrorConfig,
   AuthError,
 };

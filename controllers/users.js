@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-err');
 const { CastError } = require('../errors/cast-err');
+const { ExistFieldError } = require('../errors/exist-field-err');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -36,7 +37,20 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((data) => res.send({ data }))
+    .then((data) => res.send({
+      data: {
+        name: data.name,
+        about: data.about,
+        avatar: data.avatar,
+        email: data.email,
+      },
+    }))
+    .catch((err) => {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ExistFieldError('Email уже существует');
+      }
+      next(err);
+    })
     .catch(next);
 };
 
