@@ -3,7 +3,7 @@ const { AuthError } = require('../errors/auth-err');
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
-  const { NODE_ENV, JWT_SECRET, JWT_DEV } = process.env;
+  const { NODE_ENV, JWT_SECRET = 'secret-key', JWT_DEV } = process.env;
   const token = req.cookies.jwt;
   const secretKey = NODE_ENV === 'production' ? JWT_SECRET : JWT_DEV;
 
