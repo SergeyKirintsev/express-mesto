@@ -60,8 +60,17 @@ const getUsers = (req, res, next) => {
     .catch(next);
 };
 
-const getUserById = (req, res, next) => {
+const getMe = (req, res, next) => {
   const userId = req.user._id;
+  User.findById(userId)
+    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
+    .then((data) => res.send({ data }))
+    .catch(() => { throw new CastError('Невалидный id пользователя'); })
+    .catch(next);
+};
+
+const getUserById = (req, res, next) => {
+  const { userId } = req.params;
   User.findById(userId)
     .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
     .then((data) => res.send({ data }))
@@ -112,4 +121,5 @@ module.exports = {
   updateProfile,
   updateAvatar,
   login,
+  getMe,
 };
