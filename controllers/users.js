@@ -7,7 +7,7 @@ const { ExistFieldError } = require('../errors/exist-field-err');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  const { NODE_ENV, JWT_SECRET, JWT_DEV } = process.env;
+  const { NODE_ENV, JWT_SECRET = 'secret-key', JWT_DEV } = process.env;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
