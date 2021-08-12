@@ -2,6 +2,7 @@ const Card = require('../models/card');
 const { NotFoundError } = require('../errors/not-found-err');
 const { CastError } = require('../errors/cast-err');
 const { ValidationError } = require('../errors/validation-err');
+const { ForbiddenError } = require('../errors/forbidden-err');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -21,11 +22,24 @@ const getCards = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
+  const currentUser = req.user._id;
   const { cardId } = req.params;
-  Card.deleteOne({ _id: cardId })
-    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
-    .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id карточки'); })
+  Card.findById(cardId)
+    .orFail(() => {
+      next(new NotFoundError('Карточка с указанным _id не найдена'));
+    })
+    .then((card) => {
+      if (!card.owner.equals(currentUser)) {
+        next(new ForbiddenError('Вы не имеет права удалить карточку'));
+      } else {
+        Card.deleteOne({ _id: cardId })
+          .then((data) => res.send({ data }))
+          .catch(next);
+      }
+    })
+    .catch(() => {
+      throw new CastError('Невалидный id карточки');
+    })
     .catch(next);
 };
 
