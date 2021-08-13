@@ -4,12 +4,13 @@ const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-err');
 const { CastError } = require('../errors/cast-err');
 const { ExistFieldError } = require('../errors/exist-field-err');
+const { ValidationError } = require('../errors/validation-err');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   const { NODE_ENV, JWT_SECRET = 'secret-key', JWT_DEV } = process.env;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       // аутентификация успешна! пользователь в переменной user
       const token = jwt.sign(
@@ -23,7 +24,8 @@ const login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .send({ message: 'Аутентификация прошла успешно!' });
+        .status(200)
+        .send({ data: user.toJSON() });
     })
     .catch(next);
 };
@@ -37,21 +39,15 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((data) => res.send({
-      data: {
-        name: data.name,
-        about: data.about,
-        avatar: data.avatar,
-        email: data.email,
-      },
-    }))
+    .then((user) => res.send({ data: user.toJSON() }))
     .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ExistFieldError('Email уже существует');
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные при создании пользователя'));
       }
-      next(err);
-    })
-    .catch(next);
+      if (err.name === 'MongoError' && err.code === 11000) {
+        next(new ExistFieldError('Email уже существует'));
+      }
+    });
 };
 
 const getUsers = (req, res, next) => {
@@ -63,19 +59,21 @@ const getUsers = (req, res, next) => {
 const getMe = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
-    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const updateProfile = (req, res, next) => {
@@ -90,10 +88,11 @@ const updateProfile = (req, res, next) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -108,10 +107,11 @@ const updateAvatar = (req, res, next) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 module.exports = {

@@ -62,5 +62,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     });
 };
 
+// eslint-disable-next-line func-names
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
+
 // создаём модель и экспортируем её
 module.exports = mongoose.model('user', userSchema);
