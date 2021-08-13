@@ -25,23 +25,22 @@ const deleteCard = (req, res, next) => {
   const currentUser = req.user._id;
   const { cardId } = req.params;
   Card.findById(cardId)
-    .orFail(() => {
-      next(new NotFoundError('Карточка с указанным _id не найдена'));
-    })
+    .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена!!')))
     .then((card) => {
       if (!card.owner.equals(currentUser)) {
         next(new ForbiddenError('Вы не имеет права удалить карточку'));
       } else {
         Card.findByIdAndRemove(cardId)
-          .then((data) => res.send({ data }))
+          .then((data) => res.send({
+            data,
+            message: 'Карточка удалена',
+          }))
           .catch(next);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') next(new CastError('Невалидный id карточки'));
-      // next(err);
     });
-  // .catch(next);
 };
 
 const likeCard = (req, res, next) => {
