@@ -9,10 +9,11 @@ const createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((data) => res.send({ data }))
-    .catch(() => {
-      throw new ValidationError('Переданы некорректные данные при создании карточки');
-    })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные при создании карточки'));
+      }
+    });
 };
 
 const getCards = (req, res, next) => {
@@ -49,10 +50,11 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
+    .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена!!')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Переданы некорректные данные для постановки лайка'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Переданы некорректные данные для постановки лайка'));
+    });
 };
 
 const dislikeCard = (req, res, next) => {
@@ -61,10 +63,11 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => { throw new NotFoundError('Карточка с указанным _id не найдена'); })
+    .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена!!')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Переданы некорректные данные для снятия лайка'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Переданы некорректные данные для снятия лайка'));
+    });
 };
 
 module.exports = {
