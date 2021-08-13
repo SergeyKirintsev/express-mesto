@@ -59,19 +59,21 @@ const getUsers = (req, res, next) => {
 const getMe = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
-    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
-    .orFail(() => { throw new NotFoundError('Пользователь по указанному _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const updateProfile = (req, res, next) => {
@@ -86,10 +88,11 @@ const updateProfile = (req, res, next) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 const updateAvatar = (req, res, next) => {
@@ -104,10 +107,11 @@ const updateAvatar = (req, res, next) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
-    .orFail(() => { throw new NotFoundError('Пользователь с указанным _id не найден'); })
+    .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
-    .catch(() => { throw new CastError('Невалидный id пользователя'); })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+    });
 };
 
 module.exports = {
