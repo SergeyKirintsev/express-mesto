@@ -32,15 +32,16 @@ const deleteCard = (req, res, next) => {
       if (!card.owner.equals(currentUser)) {
         next(new ForbiddenError('Вы не имеет права удалить карточку'));
       } else {
-        Card.deleteOne({ _id: cardId })
+        Card.findByIdAndRemove(cardId)
           .then((data) => res.send({ data }))
           .catch(next);
       }
     })
-    .catch(() => {
-      throw new CastError('Невалидный id карточки');
-    })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') next(new CastError('Невалидный id карточки'));
+      // next(err);
+    });
+  // .catch(next);
 };
 
 const likeCard = (req, res, next) => {

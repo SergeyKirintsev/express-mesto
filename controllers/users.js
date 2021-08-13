@@ -4,6 +4,7 @@ const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-err');
 const { CastError } = require('../errors/cast-err');
 const { ExistFieldError } = require('../errors/exist-field-err');
+const { ValidationError } = require('../errors/validation-err');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -23,7 +24,8 @@ const login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .send({ message: 'Аутентификация прошла успешно!' });
+        .status(200)
+        .send({ data: user.toJSON() });
     })
     .catch(next);
 };
@@ -37,21 +39,15 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((data) => res.send({
-      data: {
-        name: data.name,
-        about: data.about,
-        avatar: data.avatar,
-        email: data.email,
-      },
-    }))
+    .then((user) => res.send({ data: user.toJSON() }))
     .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ExistFieldError('Email уже существует');
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные при создании пользователя'));
       }
-      next(err);
-    })
-    .catch(next);
+      if (err.name === 'MongoError' && err.code === 11000) {
+        next(new ExistFieldError('Email уже существует'));
+      }
+    });
 };
 
 const getUsers = (req, res, next) => {
