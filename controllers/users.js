@@ -46,6 +46,8 @@ const createUser = (req, res, next) => {
       }
       if (err.name === 'MongoError' && err.code === 11000) {
         next(new ExistFieldError('Email уже существует'));
+      } else {
+        next(err);
       }
     });
 };
@@ -72,7 +74,11 @@ const getUserById = (req, res, next) => {
     .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+      if (err.name === 'CastError') {
+        next(new CastError('Невалидный id пользователя'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -91,7 +97,11 @@ const updateProfile = (req, res, next) => {
     .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+      if (err.name === 'CastError') {
+        next(new CastError('Невалидный id пользователя'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -110,7 +120,11 @@ const updateAvatar = (req, res, next) => {
     .orFail(() => next(new NotFoundError('Пользователь по указанному _id не найден')))
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Невалидный id пользователя'));
+      if (err.name === 'CastError') {
+        next(new CastError('Невалидный id пользователя'));
+      } else {
+        next(err);
+      }
     });
 };
 

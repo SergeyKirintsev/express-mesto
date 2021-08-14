@@ -12,6 +12,8 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные при создании карточки'));
+      } else {
+        next(err);
       }
     });
 };
@@ -40,7 +42,11 @@ const deleteCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Невалидный id карточки'));
+      if (err.name === 'CastError') {
+        next(new CastError('Невалидный id карточки'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -53,7 +59,11 @@ const likeCard = (req, res, next) => {
     .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена!!')))
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Переданы некорректные данные для постановки лайка'));
+      if (err.name === 'CastError') {
+        next(new CastError('Переданы некорректные данные для постановки лайка'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -66,7 +76,11 @@ const dislikeCard = (req, res, next) => {
     .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена!!')))
     .then((data) => res.send({ data }))
     .catch((err) => {
-      if (err.name === 'CastError') next(new CastError('Переданы некорректные данные для снятия лайка'));
+      if (err.name === 'CastError') {
+        next(new CastError('Переданы некорректные данные для снятия лайка'));
+      } else {
+        next(err);
+      }
     });
 };
 
